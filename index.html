@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Infinite Masonry Layout with Scroll</title>
+  <style>
+    /* Basic reset and styling */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: sans-serif;
+      background: #fafafa;
+    }
+    
+    /* The masonry container uses CSS columns for the masonry effect */
+    .masonry {
+      column-count: 3;      /* Change this to adjust the number of columns */
+      column-gap: 1em;
+      padding: 1em;
+    }
+    
+    /* Each item should avoid being split across columns */
+    .item {
+      background: #eee;
+      margin-bottom: 1em;
+      break-inside: avoid;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    
+    .item img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+    
+    /* The loading indicator */
+    #loading {
+      text-align: center;
+      padding: 1em;
+      font-size: 1.2em;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <!-- The masonry container where items will be appended -->
+  <div class="masonry" id="masonry"></div>
+  
+  <!-- A sentinel element that the Intersection Observer will watch -->
+  <div id="loading">Loading…</div>
+  
+  <script>
+    const masonry = document.getElementById('masonry');
+    const loading = document.getElementById('loading');
+    let page = 1;
+    
+    // This function simulates loading items (for example, from an API)
+    function loadItems(page) {
+      // For demonstration, we add 10 items per “page”
+      for (let i = 0; i < 10; i++) {
+        const item = document.createElement('div');
+        item.className = 'item';
+        
+        // Create an image with a random height to simulate varying content sizes
+        const img = document.createElement('img');
+        const width = 300;  // Fixed width for consistency
+        const height = Math.floor(Math.random() * 200) + 200; // Height between 200 and 400
+        img.src = `https://picsum.photos/${width}/${height}?random=${page * 10 + i}`;
+        img.alt = "Random Image";
+        
+        item.appendChild(img);
+        masonry.appendChild(item);
+      }
+    }
+    
+    // Load the initial items
+    loadItems(page);
+    
+    // Set up the Intersection Observer to trigger when the loading element is visible.
+    const observer = new IntersectionObserver((entries) => {
+      // When the loading element is in view, load the next page.
+      if (entries[0].isIntersecting) {
+        // Stop observing while we load new items to prevent multiple triggers.
+        observer.unobserve(loading);
+        page++;
+        loadItems(page);
+        // Reattach the observer to the loading element.
+        observer.observe(loading);
+      }
+    }, {
+      rootMargin: "100px"  // Load a bit before the element is completely visible
+    });
+    
+    // Begin observing the loading indicator.
+    observer.observe(loading);
+  </script>
+</body>
+</html>
